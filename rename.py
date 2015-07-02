@@ -11,25 +11,26 @@ def trim(s):
 	temp = re.sub(r"\s+$", "", temp)
 	return temp
 
+def get_year(s):
+	years = re.findall(r"\d{4}", s)
+	return years[0] if len(years) > 0 else ""
+
+def format(s):
+	s = strip(r"[\[\]\(\)\-_]", s)
+	s = re.sub(r"\s{2,}", " ", s)
+	s = trim(s)
+	return s
+
 def rename(path):
 	try:
 		for subdir, _, files in os.walk(path):
-			if len(files) > 0:
-				print subdir
-				#print_files(files)
-				for f in files:
-					basename, fileExtension = os.path.splitext(f)
-					print "1: " + f
-					basename = strip(r"[\[\]\(\)\-_]", basename)
-					basename = re.sub(r"\s{2,}", " ", basename)
-					basename = trim(basename)
-					f = basename + fileExtension
-					print "2: " + f
-					print
-				years = re.findall(r"\d{4}", subdir)
-				year = ""
-				if len(years) > 0:
-					year = years[0]
+			for f in files:
+				basename, fileExtension = os.path.splitext(f)
+				print "1: " + f
+				f = format(basename) + fileExtension
+				print "2: " + f
+				print get_year(basename)
+				print
 
 	except:
 		print "Error"
