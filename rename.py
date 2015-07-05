@@ -3,6 +3,9 @@ import os, re, sys
 def slash(path):
 	return path + "\\"
 
+root_dir = slash("C:\Users\Cam\Downloads\Tycho - Discography (2002-2014) [FLAC]")
+root_dir_len = len(root_dir)
+
 def strip(expr, s):
 	return re.sub(expr, "", s)
 
@@ -21,9 +24,19 @@ def format(s):
 	s = trim(s)
 	return s
 
+def add_brackets(s):
+	return "[" + s[:4] + "]" + s[4:]
+
 def rename(path):
 	try:
 		for subdir, _, files in os.walk(path):
+			if len(subdir) != root_dir_len:
+				folder_name = subdir[root_dir_len:]
+				folder_name = format(folder_name)
+				folder_name = add_brackets(folder_name)
+				os.rename(subdir, root_dir + folder_name)
+				
+			"""
 			for f in files:
 				basename, fileExtension = os.path.splitext(f)
 				print "1: " + f
@@ -31,13 +44,10 @@ def rename(path):
 				print "2: " + f
 				print get_year(basename)
 				print
+				"""
 
 	except:
 		print "Error"
-
-
-
-root_dir = slash("C:\\Users\\Cam\\Documents\\rtest")
 
 if raw_input("Do you want to run this? yn\n") == "y":
 	rename(root_dir)
