@@ -13,7 +13,10 @@ def trim(s):
 
 def get_year(s):
 	years = re.findall(r"\d{4}", s)
-	return years[0] if len(years) > 0 else ""
+	if len(years) > 0:
+		return years[0]
+	else:
+		return ""
 
 def format(s):
 	s = strip(r"[\[\]\(\)\-_]", s)
@@ -36,22 +39,23 @@ def add_brackets(s):
 def rename(path):
 	root_dir_len = len(path)
 	try:
-		for subdir, _, files in os.walk(path):
+		for subdir, dirs, files in os.walk(path):
+			subdir = os.path.normpath(subdir)
 			if len(subdir) == root_dir_len:
 				new = get_artist_name(subdir)
-			else:
-
-				#TODO only format end-level directories
-
-				folder_name = subdir[root_dir_len:]
+			elif not dirs:
+				dir_name = slash(os.path.dirname(subdir))
+				folder_name = os.path.basename(subdir)
 				folder_name = format(folder_name)
-				folder_name = add_brackets(folder_name)
-				new = path + folder_name
-			os.rename(subdir, new)
-			print "Renamed " + subdir + " to " + new
+				if get_year(folder_name) != "":
+					folder_name = add_brackets(folder_name)
+				new = dir_name + folder_name
+				os.rename(subdir, new)
+				print "Renamed " + subdir + " to " + new
 		print "Finished!!"
-	except:
-		print "Error"
+	except ValueError:
+		print "Error ", ValueError
+		raw_input()
 
 if raw_input("Do you want to run this? yn\n") == "y":
 	rename(slash(raw_input("Directory: ")))
