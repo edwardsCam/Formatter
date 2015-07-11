@@ -1,4 +1,4 @@
-import os, re, sys
+import os, re
 
 def slash(path):
 	return path + "\\"
@@ -13,10 +13,8 @@ def trim(s):
 
 def get_year(s):
 	years = re.findall(r"\d{4}", s)
-	if len(years) > 0:
-		return years[0]
-	else:
-		return ""
+	if len(years) > 0: return years[0]
+	else: return ""
 
 def format(s):
 	s = strip(r"[\[\]\(\)\-_]", s)
@@ -30,8 +28,7 @@ def get_artist_name(path):
 		d = disc.group(0)
 		idx = path.find(d)
 		return path[:idx]
-	else:
-		return path
+	else: return path
 
 def add_brackets(s):
 	return "[" + s[:4] + "]" + s[4:]
@@ -43,22 +40,18 @@ def rename(root, move):
 				name = os.path.normpath(name)
 				dir_name = slash(os.path.dirname(name))
 				base_name = format(os.path.basename(name))
-				if get_year(base_name) != "":
-					base_name = add_brackets(base_name)
-				if move:
-					new = root + base_name
-				else:
-					new = dir_name + base_name
+				if get_year(base_name) != "": base_name = add_brackets(base_name)
+				if move: new = root + base_name
+				else: new = dir_name + base_name
 				os.rename(name, new)
-				print name + " -> " + new
-
+				print name + "  ->  " + new
 		os.rename(root, get_artist_name(root))
-		print "\nFinished!!\n"
+		print "\n -- Success! -- \n"
 	except ValueError:
 		print "\nError ", ValueError
 		raw_input()
 
-if raw_input("Do you want to run this? [yn] ") == "y":
+if raw_input("Are you sure you want to run this? [yn] ") == "y":
 	dir = slash(raw_input("Directory: "))
 	move = raw_input("Move all folders to root? [yn] ") == "y"
 	rename(dir, move)
