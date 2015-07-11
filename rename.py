@@ -12,9 +12,8 @@ def strip(expr, s):
 	return re.sub(expr, "", s)
 
 def trim(s):
-	temp = re.sub(r"^\s+", "", s)
-	temp = re.sub(r"\s+$", "", temp)
-	return temp
+	s = re.sub(r"^\s+", "", s)
+	return re.sub(r"\s+$", "", s)
 
 def format(s):
 	s = strip(r"[\[\]\(\)\-_]", s)
@@ -25,8 +24,9 @@ def format(s):
 def split(s):
 	years = re.findall(r"\d{4}", s)
 	if len(years) > 1:
-		print "\n -- Unclear format on ", s, " --"
-		print " -- Cannot decipher album name / year -- "
+		print "\n -- NOW WAIT JUST A MINUTE, YOU --"
+		print " - Unclear format on '" + s + "' -"
+		print " - Cannot decipher album name / year - "
 		album = ""
 		while album == "":
 			album = raw_input("Please enter the album name: ")
@@ -42,11 +42,11 @@ def split(s):
 	return [year, album]
 
 def get_artist_name(path):
-	disc = re.search(r"\W*discography", path, re.IGNORECASE)
+	disc = re.search(r"(complete)?\W*discography", path, re.IGNORECASE)
 	if disc:
 		d = disc.group(0)
 		idx = path.find(d)
-		return path[:idx]
+		return format(path[:idx])
 	else: return path
 
 def bracket(s):
@@ -54,45 +54,53 @@ def bracket(s):
 	else: return s
 
 def fprint(d):
-	max_len = 0
-	for k in d:
-		if len(k) > max_len:
-			max_len = len(k)
-	for k in sorted(d):
-		diff = 1 + max_len - len(k)
-		print k, " "*diff, " ->  ", d[k]
+	print "Changes:"
+	if len(d) == 0:
+		print "  None!"
+	else:
+		max_len = 0
+		for k in d:
+			if len(k) > max_len:
+				max_len = len(k)
+		for k in sorted(d):
+			diff = 1 + max_len - len(k)
+			print " ", k, " "*diff, "-> ", d[k]
 
 def rename(root, move):
+	output = {}
 	artist = get_artist_name(root)
 	os.rename(root, artist)
+	if root != artist:
+		output[root] = artist
 	root = slash(artist)
 	idx = len(os.path.dirname(unslash(root)))
-	output = {}
-	try:
-		for path, dirs, __ in os.walk(root):
-			if not dirs:
-				path = os.path.normpath(path)
-				if move:
-					dir_name = root
-				else:
-					dir_name = slash(os.path.dirname(path))
-				base_name = format(os.path.basename(path))
-				album = split(base_name)
-				base_name = bracket(album[0]) + album[1]
-				new = dir_name + base_name
+	for path, dirs, __ in os.walk(root):
+		if not dirs:
+			path = os.path.normpath(path)
+			if move:
+				dir_name = root
+			else:
+				dir_name = slash(os.path.dirname(path))
+			base_name = format(os.path.basename(path))
+			album = split(base_name)
+			base_name = bracket(album[0]) + album[1]
+			new = dir_name + base_name
+			if path != new:
 				os.rename(path, new)
 				output[path[idx:]] = new[idx:]
 
-		fprint(output)
-		print "\n -- Success! -- \n"
+	fprint(output)
+	print "\n -- Success! --"
 
-	except ValueError:
-		print "\nError ", ValueError
-		raw_input()
-
-if raw_input("Are you sure you want to run this? [yn] ") == "y":
+print "This will alter some directory names."
+inp = raw_input("Are you sure you want to run this? [yn] ")
+if inp == "y" or inp == "yes":
 	dir = slash(raw_input("Directory: "))
 	move = raw_input("Move all subfolders to the given root directory? [yn] ") == "y"
 	print
-	rename(dir, move)
-	raw_input("\n -- Enter to exit -- \n")
+	try:
+		rename(dir, move)
+	except ValueError as ex:
+		print "\nError ", ex
+		raw_input()
+	raw_input("\n -- Enter to exit --\n")
