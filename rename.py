@@ -36,27 +36,30 @@ def get_artist_name(path):
 def add_brackets(s):
 	return "[" + s[:4] + "]" + s[4:]
 
-def rename(path):
-	root_dir_len = len(path)
+def rename(root, move):
 	try:
-		for subdir, dirs, files in os.walk(path):
-			subdir = os.path.normpath(subdir)
-			if len(subdir) == root_dir_len:
-				new = get_artist_name(subdir)
-			elif not dirs:
-				dir_name = slash(os.path.dirname(subdir))
-				folder_name = os.path.basename(subdir)
-				folder_name = format(folder_name)
-				if get_year(folder_name) != "":
-					folder_name = add_brackets(folder_name)
-				new = dir_name + folder_name
-				os.rename(subdir, new)
-				print "Renamed " + subdir + " to " + new
-		print "Finished!!"
+		for name, dirs, __ in os.walk(root):
+			if not dirs:
+				name = os.path.normpath(name)
+				dir_name = slash(os.path.dirname(name))
+				base_name = format(os.path.basename(name))
+				if get_year(base_name) != "":
+					base_name = add_brackets(base_name)
+				if move:
+					new = root + base_name
+				else:
+					new = dir_name + base_name
+				os.rename(name, new)
+				print name + " -> " + new
+
+		os.rename(root, get_artist_name(root))
+		print "\nFinished!!\n"
 	except ValueError:
-		print "Error ", ValueError
+		print "\nError ", ValueError
 		raw_input()
 
-if raw_input("Do you want to run this? yn\n") == "y":
-	rename(slash(raw_input("Directory: ")))
-	raw_input(" -- Enter to exit -- ")
+if raw_input("Do you want to run this? [yn] ") == "y":
+	dir = slash(raw_input("Directory: "))
+	move = raw_input("Move all folders to root? [yn] ") == "y"
+	rename(dir, move)
+	raw_input("\n -- Enter to exit -- \n")
