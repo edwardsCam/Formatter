@@ -44,8 +44,7 @@ def split(s):
 def get_artist_name(path):
 	disc = re.search(r"(complete)?\W*discography", path, re.IGNORECASE)
 	if disc:
-		d = disc.group(0)
-		idx = path.find(d)
+		idx = path.find(disc.group(0))
 		return format(path[:idx])
 	else: return path
 
@@ -92,15 +91,16 @@ def rename(root, move):
 	fprint(output)
 	print "\n -- Success! --"
 
-print "This will alter some directory names."
-inp = raw_input("Are you sure you want to run this? [yn] ")
+print " --- This will alter some directory names. --- "
+inp = raw_input(" -- Are you sure you want to run this? [yn] -- ")
 if inp == "y" or inp == "yes":
 	dir = slash(raw_input("Directory: "))
 	move = raw_input("Move all subfolders to the given root directory? [yn] ") == "y"
 	print
 	try:
 		rename(dir, move)
-	except ValueError as ex:
-		print "\nError ", ex
-		raw_input()
-	raw_input("\n -- Enter to exit --\n")
+	except Exception as ex:
+		print "Error"
+		print "\n -- UH OH GEEZ MAN WHAT DID YOU DO --"
+		print "Exception:", ex
+	raw_input("\n --- Enter to exit ---\n")
